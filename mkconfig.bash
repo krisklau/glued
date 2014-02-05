@@ -109,6 +109,8 @@ fi
 cfg_sys_family="$family_name"
 # Config: GLUED source tree base path.
 cfg_dir_base="$PWD"
+# Config: installation root folder.
+cfg_dir_root="$cfg_dir_base/root"
 # Config: system configuration folder.
 cfg_dir_system="$cfg_dir_base/$family_dir"
 # Config: package rules folder.
@@ -119,32 +121,30 @@ cfg_dir_postconfiguration="$cfg_dir_base/postconfiguration"
 cfg_dir_downloads="$cfg_dir_base/downloads"
 # Config: build folder.
 cfg_dir_builds="$cfg_dir_base/$cfg_sys_family/builds"
-# Config: toolchain destination folder.
-cfg_dir_toolchain="$cfg_dir_base/$cfg_sys_family/toolchain"
-# Config: root filesystem folder.
-cfg_dir_rootfs="$cfg_dir_base/$cfg_sys_family/rootfs"
+# Config: packages destination folder.
+cfg_dir_packages="$cfg_dir_base/$cfg_sys_family/packages"
 # Config: system root folder.
-cfg_dir_toolchain_sysroot="$cfg_dir_toolchain/$cfg_target_canonical/sysroot"
+cfg_dir_sysroot="$cfg_dir_root/$cfg_target_canonical/sysroot"
 # Target prefix:
-cmd_target_prefix="$cfg_dir_toolchain/bin/$cfg_target_canonical-"
+cmd_target_prefix="$cfg_dir_root/bin/$cfg_target_canonical-"
 # Config: target C compiler executable.
-cmd_target_cc="$cfg_dir_toolchain/bin/$cfg_target_canonical-gcc"
+cmd_target_cc="$cfg_dir_root/bin/$cfg_target_canonical-gcc"
 # Config: target C pre-processor executable.
-cmd_target_cpp="$cfg_dir_toolchain/bin/$cfg_target_canonical-cpp"
+cmd_target_cpp="$cfg_dir_root/bin/$cfg_target_canonical-cpp"
 # Config: target C++ compiler executable.
-cmd_target_cxx="$cfg_dir_toolchain/bin/$cfg_target_canonical-g++"
+cmd_target_cxx="$cfg_dir_root/bin/$cfg_target_canonical-g++"
 # Config: target archiver executable.
-cmd_target_ar="$cfg_dir_toolchain/bin/$cfg_target_canonical-ar"
+cmd_target_ar="$cfg_dir_root/bin/$cfg_target_canonical-ar"
 # Config: target linker executable.
-cmd_target_ld="$cfg_dir_toolchain/bin/$cfg_target_canonical-ld"
+cmd_target_ld="$cfg_dir_root/bin/$cfg_target_canonical-ld"
 # Config: target strip executable.
-cmd_target_strip="$cfg_dir_toolchain/bin/$cfg_target_canonical-strip"
+cmd_target_strip="$cfg_dir_root/bin/$cfg_target_canonical-strip"
 # Config: target archive indexer executable.
-cmd_target_ranlib="$cfg_dir_toolchain/bin/$cfg_target_canonical-ranlib"
+cmd_target_ranlib="$cfg_dir_root/bin/$cfg_target_canonical-ranlib"
 # Config: host compiler executable.
 cmd_host_cc="gcc"
 # Command: strip command.
-cmd_target_strip="$cmd_target_strip --strip-unneeded"
+cmd_target_strip="$cmd_target_strip -v --strip-unneeded"
 # Command: command to create folders.
 cmd_mkdir="mkdir -pv"
 # Command: copy data.
@@ -157,17 +157,13 @@ cfg_host_canonical="$($cmd_host_cc -dumpmachine 2> /dev/null)"
 cmd_make_single="make -j1"
 # Command: make command.
 cmd_make="make -j$cfg_host_cores"
-# Config: rootfs tar file.
-if [ -z $cfg_rootfs_tar ]; then
-    cfg_rootfs_tar="$cfg_dir_base/$cfg_sys_family/glued-$cfg_glued_version-$cfg_sys_name-rootfs.tar.bz2"
-fi
-# Config: toolchain tar file.
-if [ -z $cfg_toolchain_tar ]; then
-    cfg_toolchain_tar="$cfg_dir_base/$cfg_sys_family/glued-$cfg_glued_version-$cfg_sys_family-toolchain-$cfg_host_canonical-$cfg_target_canonical.tar.bz2"
-fi
 
 if ! [ -d "$cfg_sys_family" ]; then
     mkdir -p "$cfg_sys_family"
+fi &&
+
+if ! [ -d "$cfg_dir_root" ]; then
+    mkdir -p "$cfg_dir_root"
 fi &&
 
 # Save configuration values to file.

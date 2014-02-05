@@ -53,6 +53,19 @@ md5sum_tool()
     fi
 }
 
+pkg_config_env_host()
+{
+    export PKG_CONFIG_PATH="$cfg_dir_root/lib/pkgconfig"
+    export PKG_CONFIG_SYSROOT_DIR="$cfg_dir_root"
+}
+
+fix_libtool_libdir()
+{
+    sed \
+        "s%//lib%$cfg_dir_sysroot/lib%g" \
+        "$1" -i
+}
+
 download()
 {
     n=0; while [ -n "${url[$n]}" ]; do
@@ -137,7 +150,7 @@ unpack()
         let n++
     done
 
-    dir_gnu_cfg="$cfg_dir_toolchain/share/gnu-config"
+    dir_gnu_cfg="$cfg_dir_root/share/gnu-config"
     if [ "$cfg_dir_cfg/config.sub" ]; then
         find "$cfg_dir_builds/$pkg" -name config.sub -exec install -v -m 0755 "$dir_gnu_cfg/config.sub" '{}' \;
     fi
@@ -174,6 +187,11 @@ target_install()
     echo "Using dummy 'target_install' rule."
 }
 
+install()
+{
+    echo "Using dummy 'install' rule."
+}
+
 postconfigure()
 {
     echo "Using dummy 'postconfigure' rule."
@@ -184,14 +202,74 @@ perform_clean()
     rm -rf "$cfg_dir_builds/$pkg/$pkg_var"
 }
 
+make_package()
+{
+    file="$pkg-$version-$pkg_var.tar.xz"
+
+    # Host.
+    if [ -n "$(ls -A "$pkg_dir_host")" ]; then
+        case "$pkg_var" in
+            host)
+                file="$cfg_host_canonical+$pkg-$version.tar.xz"
+                ;;
+            cross)
+                file="$cfg_host_canonical+$cfg_target_canonical+$pkg-$version.tar.xz"
+                ;;
+            *)
+                file="$cfg_host_canonical+$pkg-$version-$pkg_var.tar.xz"
+                ;;
+        esac
+
+        dst="$cfg_dir_packages/$file"
+        tar --xz -c -v -C "$pkg_dir_host" -f "$dst" . &&
+        tar -x -v -f "$dst" -C "$cfg_dir_root"
+    fi &&
+
+    # Target.
+    if [ -n "$(ls -A "$pkg_dir_target")" ]; then
+        case "$pkg_var" in
+            default | target | cross)
+                file="$cfg_target_canonical+$pkg-$version.tar.xz"
+                ;;
+            *)
+                file="$cfg_target_canonical+$pkg-$version-$pkg_var.tar.xz"
+                ;;
+        esac
+
+        dst="$cfg_dir_packages/$file"
+        tar --xz -c -v -C "$pkg_dir_target" -f "$dst" .
+    fi
+
+    # Specific machine.
+    if [ -n "$(ls -A "$pkg_dir_machine")" ]; then
+        case "$pkg_var" in
+            default | target | cross)
+                file="$cfg_sys_name+$pkg-$version.tar.xz"
+                ;;
+            *)
+                file="$cfg_sys_name+$pkg-$version-$pkg_var.tar.xz"
+                ;;
+        esac
+
+        dst="$cfg_dir_packages/$file"
+        tar --xz -c -v -C "$pkg_dir_machine" -f "$dst" .
+    fi
+}
+
 perform_all()
 {
     start="$(date +%s)"
     nfo1 "$pkg / $pkg_var"
 
-    export pkg_build_dir="$cfg_dir_builds/$pkg/$pkg_var"
+    export pkg_dir_build="$cfg_dir_builds/$pkg/$pkg_var"
+    export pkg_dir_host="$pkg_dir_build/_glued-host"
+    export pkg_dir_target="$pkg_dir_build/_glued-target"
+    export pkg_dir_machine="$pkg_dir_build/_glued-machine"
+    export pkg_dir_sysroot="$pkg_dir_host/$cfg_target_canonical/sysroot"
 
-    for rule in download unpack post_unpack refresh configure build host_install target_install postconfigure; do
+    mkdir -p "$pkg_dir_host" "$pkg_dir_target" "$pkg_dir_machine"
+
+    for rule in download unpack post_unpack refresh configure build host_install target_install install postconfigure make_package; do
         case $rule in
             download | unpack | post_unpack)
                 marker="$cfg_dir_builds/$pkg/.$rule"
@@ -260,36 +338,11 @@ unset LD_LIBRARY_PATH
 unset CFLAGS
 unset LDFLAGS
 unset CXXFLAGS
-export PKG_CONFIG_PATH="$cfg_dir_toolchain_sysroot/usr/lib/pkgconfig"
-export LD_LIBRARY_PATH="$cfg_dir_toolchain/lib"
-
-# Sanitize PATH.
-paths="$(echo $PATH | sed 's%/\{1,\}%/%g')"
-clean_path=""
-while [ -n "$paths" ]; do
-    path=$(echo "$paths" | cut -f1 -d:)
-    paths=$(echo "$paths" | cut -f2- -d:)
-
-    if [ "$path" = "$paths" ]; then
-        paths=""
-    fi
-
-    if [ "$path" = "" ] || [ "$path" = "." ] || [ "$path" = "./" ]; then
-        continue
-    fi
-
-    if [ "$path" = "$cfg_dir_toolchain/$cfg_target_canonical/bin" ]; then
-        continue
-    fi
-
-    if [ "$path" = "$cfg_sys_family/toolchain/$cfg_target_canonical/bin" ]; then
-        continue
-    fi
-
-    clean_path="$clean_path:$path"
-done
-
-export PATH="$cfg_dir_toolchain/bin$clean_path"
+export PKG_CONFIG="$cfg_dir_root/bin/pkg-config"
+export PKG_CONFIG_PATH="$cfg_dir_sysroot/lib/pkgconfig"
+export PKG_CONFIG_SYSROOT_DIR="$cfg_dir_sysroot"
+export LD_LIBRARY_PATH="$cfg_dir_root/lib"
+export PATH="$cfg_dir_root/bin:$PATH"
 
 pkg="$(echo $2 | cut -f1 -d'/')"
 pkg_var="$(echo $2 | cut -f2 -d'/')"
@@ -318,7 +371,10 @@ else
     rule="$3"
 fi
 
-mkdir -p "$cfg_dir_downloads" "$cfg_dir_rootfs" "$cfg_dir_toolchain" "$cfg_dir_builds/$pkg"
+mkdir -p \
+    "$cfg_dir_downloads" \
+    "$cfg_dir_packages" \
+    "$cfg_dir_builds/$pkg"
 
 export pkg_dir="$cfg_dir_rules/$pkg"
 
