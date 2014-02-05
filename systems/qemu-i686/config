@@ -4,5 +4,5 @@ cfg_services0='dropbear network storage upgrade syslog'
 cfg_services1=''
 cfg_services2='dune'
 cfg_modules=''
-cfg_packages='dropbear rsync busybox linux e2fsprogs syslinux syslinux/host pciutils'
+cfg_packages='busybox dropbear rsync e2fsprogs syslinux syslinux/host pciutils linux'
 cfg_kernel_extra_args="tsc=reliable"
