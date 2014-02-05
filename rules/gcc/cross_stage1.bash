@@ -1,9 +1,8 @@
-source $pkg_common
+source "$pkg_common"
 
 requires=\
 (
     'binutils/cross'
-    'autoconf/host'
     'mpfr/host'
     'gmp/host'
     'mpc/host'
@@ -12,14 +11,15 @@ requires=\
 configure()
 {
     MAKEINFO='/bin/true' \
-    "../gcc-$version/configure" $cfg_target_gcc_configure_flags \
+        "../gcc-$version/configure" $cfg_target_gcc_configure_flags \
         --target="$cfg_target_canonical" \
         --host="$cfg_host_canonical" \
         --build="$cfg_host_canonical" \
-        --prefix="$cfg_dir_toolchain" \
-        --with-mpfr="$cfg_dir_toolchain" \
-        --with-gmp="$cfg_dir_toolchain" \
-        --with-mpc="$cfg_dir_toolchain" \
+        --prefix="$cfg_dir_root" \
+        --with-mpfr="$cfg_dir_root" \
+        --with-gmp="$cfg_dir_root" \
+        --with-mpc="$cfg_dir_root" \
+        --with-newlib \
         --without-headers \
         --disable-shared \
         --disable-threads \
@@ -29,12 +29,11 @@ configure()
         --disable-libmudflap \
         --disable-libquadmath \
         --disable-multilib \
-        --with-newlib \
+        --disable-decimal-float \
+        --disable-nls \
         --enable-poison-system-directories \
         --enable-target-optspace \
-        --enable-languages=c \
-        --disable-decimal-float \
-        --disable-nls
+        --enable-languages=c
 }
 
 build()
@@ -44,5 +43,12 @@ build()
 
 host_install()
 {
-    $cmd_make install
+    $cmd_make \
+        prefix="$pkg_dir_host" \
+        install &&
+
+    rm -rf \
+        "$pkg_dir_host/include" \
+        "$pkg_dir_host/share" \
+        "$pkg_dir_host/lib/libiberty.a"
 }

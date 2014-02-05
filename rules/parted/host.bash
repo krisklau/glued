@@ -15,10 +15,8 @@ md5=\
 
 configure()
 {
-    CFLAGS="-I$cfg_dir_toolchain/include" \
-	LDFLAGS="-L$cfg_dir_toolchain/lib" \
-	./configure \
-	--prefix="$cfg_dir_toolchain" \
+    ./configure                       \
+	--prefix="$cfg_dir_root"      \
         --without-readline            \
 	--disable-device-mapper       \
 	--disable-shared              \
@@ -28,10 +26,17 @@ configure()
 
 build()
 {
-  $cmd_make
+    $cmd_make
 }
 
-host_install()
+install()
 {
-  $cmd_make install
+    $cmd_make \
+        prefix="$pkg_dir_host" \
+        install &&
+
+    rm -rf \
+        "$pkg_dir_host/share" \
+        "$pkg_dir_host/include" \
+        "$pkg_dir_host/lib"
 }

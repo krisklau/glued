@@ -1,6 +1,6 @@
 version=\
 (
-    '2012.55'
+    '2013.62'
 )
 
 url=\
@@ -10,7 +10,7 @@ url=\
 
 md5=\
 (
-    '8c784baec3054cdb1bb4bfa792c87812'
+    'ca2c7932a1399cf361f795aaa3843998'
 )
 
 maintainer=\
@@ -29,12 +29,15 @@ post_unpack()
     if [ -n "$patches" ]; then
         cat $patches | patch -p1
     fi
+
+    # Just to avoid make install failure.
+    cp -v dbclient.1 scp.1
 }
 
 configure()
 {
     "../dropbear-$version/configure" \
-        --prefix="$cfg_dir_rootfs/usr" \
+        --prefix="/" \
         --disable-utmp \
         --disable-utmpx \
         --disable-wtmp \
@@ -43,7 +46,7 @@ configure()
         --target="$cfg_target_canonical" \
         --host="$cfg_target_canonical" \
         --build="$cfg_host_canonical" \
-        --with-zlib="$cfg_dir_toolchain"
+        --with-zlib="$cfg_dir_root"
 }
 
 build()
@@ -53,14 +56,36 @@ build()
         MULTI=1
 }
 
-target_install()
+host_install()
 {
-    $cmd_target_strip dropbearmulti -o "$cfg_dir_rootfs/usr/bin/dropbearmulti" &&
-    ln -fs dropbearmulti "$cfg_dir_rootfs/usr/bin/dropbearconvert" &&
-    ln -fs dropbearmulti "$cfg_dir_rootfs/usr/bin/dropbearkey" &&
-    ln -fs dropbearmulti "$cfg_dir_rootfs/usr/bin/scp" &&
-    ln -fs dropbearmulti "$cfg_dir_rootfs/usr/bin/ssh" &&
-    ln -fs dropbearmulti "$cfg_dir_rootfs/usr/bin/dbclient" &&
-    ln -fs ../bin/dropbearmulti "$cfg_dir_rootfs/usr/sbin/dropbear" &&
-    tar -C "$pkg_dir/fs" --exclude .svn -c -f - . | tar -C "$cfg_dir_rootfs" -x -v -f -
+    # Host.
+    $cmd_make \
+        PROGRAMS="dropbear dbclient dropbearkey dropbearconvert scp" \
+        MULTI=1 \
+        prefix="$pkg_dir_sysroot" \
+        install &&
+
+    ln -fs ../bin/dropbearmulti "$pkg_dir_sysroot/sbin/dropbear" &&
+    ln -fs dropbearmulti "$pkg_dir_sysroot/bin/dbclient" &&
+    ln -fs dropbearmulti "$pkg_dir_sysroot/bin/dropbearkey" &&
+    ln -fs dropbearmulti "$pkg_dir_sysroot/bin/dropbearconvert" &&
+    ln -fs dropbearmulti "$pkg_dir_sysroot/bin/scp" &&
+
+    rm -rf \
+        "$pkg_dir_sysroot/share" &&
+
+    # Target.
+    $cmd_cp \
+        "$pkg_dir_sysroot/"* \
+        "$pkg_dir_target" &&
+
+    $cmd_target_strip \
+        "$pkg_dir_target/bin/dropbearmulti" &&
+
+    $cmd_cp \
+        "$pkg_dir/fs"/* \
+        "$pkg_dir_target" &&
+
+    $cmd_mkdir \
+        "$pkg_dir_target/etc/dropbear"
 }

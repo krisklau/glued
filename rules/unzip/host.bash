@@ -1,6 +1,6 @@
 version=\
 (
-    "6.0"
+    '6.0'
 )
 
 url=\
@@ -10,22 +10,31 @@ url=\
 
 md5=\
 (
-    "62b490407489521db863b523a7f86375"
+    '62b490407489521db863b523a7f86375'
 )
 
 maintainer=\
 (
-    "Ricardo Martins <rasm@fe.up.pt>"
+    'Ricardo Martins <rasm@fe.up.pt>'
 )
 
 build()
 {
     cd ../unzip60 &&
-    $cmd_make -f unix/Makefile generic
+
+    $cmd_make \
+        -f unix/Makefile \
+        generic
 }
 
-host_install()
+install()
 {
     cd ../unzip60 &&
-    $cmd_make prefix="$cfg_dir_toolchain" -f unix/Makefile install
+    $cmd_make \
+        prefix="$pkg_dir_host" \
+        -f unix/Makefile \
+        install &&
+
+    rm -rf \
+        "$pkg_dir_host/man"
 }

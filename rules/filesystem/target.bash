@@ -1,42 +1,43 @@
 version=\
 (
-    "1.0"
+    '1.0'
 )
 
 maintainer=\
 (
-    "Ricardo Martins <rasm@fe.up.pt>"
+    'Ricardo Martins <rasm@fe.up.pt>'
 )
 
-target_install()
+install()
 {
     $cmd_mkdir \
-        "$cfg_dir_rootfs"/{dev,boot,proc,sys,mnt,etc,bin,sbin,opt,var,root} \
-        "$cfg_dir_rootfs"/usr/{bin,sbin,lib,lib/firmware} \
-        "$cfg_dir_rootfs"/opt \
-        "$cfg_dir_rootfs"/dev/{shm,pts} \
-        "$cfg_dir_rootfs"/etc/rc.d
+        "$pkg_dir_target"/{dev,boot,proc,sys,mnt,etc,bin,sbin,opt,var,root,usr,opt,lib} \
+        "$pkg_dir_target"/dev/{shm,pts} \
+        "$pkg_dir_target"/etc/rc.d &&
 
-    ln -fs usr/lib "$cfg_dir_rootfs"/lib &&
-    ln -fs dev/shm "$cfg_dir_rootfs"/tmp &&
-    ln -fs ../tmp "$cfg_dir_rootfs"/var/tmp &&
-    ln -fs ../tmp "$cfg_dir_rootfs"/var/run &&
-    ln -fs ../tmp "$cfg_dir_rootfs"/var/log &&
-    ln -fs ../tmp "$cfg_dir_rootfs"/var/lock &&
-    ln -fs /sbin/init "$cfg_dir_rootfs"/init &&
-    ln -fs /tmp/resolv.conf "$cfg_dir_rootfs"/etc/resolv.conf &&
-    ln -fs /proc/self/mounts "$cfg_dir_rootfs"/etc/mtab &&
+    ln -fs dev/shm "$pkg_dir_target"/tmp &&
+    ln -fs ../tmp "$pkg_dir_target"/var/tmp &&
+    ln -fs ../tmp "$pkg_dir_target"/var/run &&
+    ln -fs ../tmp "$pkg_dir_target"/var/log &&
+    ln -fs ../tmp "$pkg_dir_target"/var/lock &&
+    ln -fs /sbin/init "$pkg_dir_target"/init &&
+    ln -fs /tmp/resolv.conf "$pkg_dir_target"/etc/resolv.conf &&
+    ln -fs /proc/self/mounts "$pkg_dir_target"/etc/mtab &&
 
     if [ -n "$cfg_target_lib64" ]; then
-        ln -fs lib "$cfg_dir_rootfs/lib64"
+        ln -fs lib "$pkg_dir_target/lib64"
     fi
 
-    $cmd_mkdir "$cfg_dir_rootfs"/root/.ssh &&
-    chmod 0700 "$cfg_dir_rootfs"/root/.ssh &&
+    $cmd_mkdir "$pkg_dir_target/root/.ssh" &&
+    chmod 0700 "$pkg_dir_target/root/.ssh" &&
 
-    tar -C "$pkg_dir/fs" --exclude .svn -c -f - . | tar -C "$cfg_dir_rootfs" -x -v -f -
+    $cmd_cp \
+        "$pkg_dir/fs/"* \
+        "$pkg_dir_target" &&
 
     if [ -d "$cfg_dir_system/fs" ]; then
-        tar -C "$cfg_dir_system/fs" --exclude .svn -c -f - . | tar -C "$cfg_dir_rootfs" -x -v -f -
+        $cmd_cp \
+            "$cfg_dir_system/fs/"* \
+            "$pkg_dir_target"
     fi
 }

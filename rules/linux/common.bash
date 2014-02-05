@@ -6,8 +6,10 @@ post_unpack()
         cat $patches | patch -p1
     fi
 
-    if [ -d "$cfg_dir_toolchain/firmware" ]; then
-        tar -C "$cfg_dir_toolchain/firmware" -c -v -f - . | tar -C firmware -x -v -f -
+    if [ -d "$cfg_dir_root/firmware" ]; then
+        $cmd_cp \
+            "$cfg_dir_root/firmware/"* \
+            firmware
     fi
 }
 
@@ -22,87 +24,87 @@ refresh()
 
 configure()
 {
+    # Cleanup.
     $cmd_make \
-        ARCH=${cfg_target_linux} \
+        ARCH="$cfg_target_linux" \
         mrproper &&
 
-    cp "$cfg_dir_system/cfg/linux-${version}.cfg" .config &&
+    # Copy configuration.
+    cp \
+        "$cfg_dir_system/cfg/linux-$version.cfg" \
+        .config &&
 
+    # Commit configuration.
     yes '' | $cmd_make \
-        CROSS_COMPILE=${cfg_target_canonical}- \
-        ARCH=${cfg_target_linux} \
+        CROSS_COMPILE="$cfg_target_canonical-" \
+        ARCH="$cfg_target_linux" \
         oldconfig
 }
 
 build()
 {
+    # Build kernel.
     $cmd_make \
-        CROSS_COMPILE=$cfg_target_canonical- \
-        ARCH=$cfg_target_linux &&
+        CROSS_COMPILE="$cfg_target_canonical-" \
+        ARCH="$cfg_target_linux" &&
+
+    # Build modules.
     $cmd_make \
-        CROSS_COMPILE=$cfg_target_canonical- \
-        ARCH=$cfg_target_linux \
+        CROSS_COMPILE="$cfg_target_canonical-" \
+        ARCH="$cfg_target_linux" \
         modules &&
 
+    # U-Boot image.
     if [ "$(basename $cfg_target_linux_kernel)" = 'uImage' ]; then
         $cmd_make \
-            CROSS_COMPILE=$cfg_target_canonical- \
-            ARCH=$cfg_target_linux \
+            CROSS_COMPILE="$cfg_target_canonical-" \
+            ARCH="$cfg_target_linux" \
             uImage
-    fi
+    fi &&
 
     # Compressed image.
     if [ "$(basename $cfg_target_linux_kernel)" = 'zImage' ]; then
         $cmd_make \
-            CROSS_COMPILE=$cfg_target_canonical- \
-            ARCH=$cfg_target_linux \
+            CROSS_COMPILE="$cfg_target_canonical-" \
+            ARCH="$cfg_target_linux" \
             zImage
-    fi
+    fi &&
 
     # Device tree blob.
     if [ -n "$cfg_target_linux_dtb" ]; then
         $cmd_make \
-            CROSS_COMPILE=$cfg_target_canonical- \
-            ARCH=$cfg_target_linux \
+            CROSS_COMPILE="$cfg_target_canonical-" \
+            ARCH="$cfg_target_linux" \
             dtbs
-    fi
-
-    if [ -n "${cfg_target_linux_size}" ]; then
-        dd if="$cfg_target_linux_kernel" of="${cfg_target_linux_kernel}.padded" \
-            ibs="${cfg_target_linux_size}" conv=sync &&
-        mv "${cfg_target_linux_kernel}.padded" "${cfg_target_linux_kernel}"
     fi
 }
 
 target_install()
 {
-    kernel="$cfg_dir_base/${cfg_sys_family}/glued-${cfg_glued_version}-${cfg_sys_family}-kernel.bin"
-
-    if [ -n "$(file "$cfg_target_linux_kernel" | grep ELF)" ]; then
-        strip="$(echo $cfg_dir_toolchain/bin/*-strip)"
-        $strip -s -R .comment "$cfg_target_linux_kernel"
-    fi
+    $cmd_mkdir \
+        "$pkg_dir_target/boot" &&
 
     # Kernel image.
     if [ -n "$cfg_target_linux_kernel" ]; then
-        cp -v "$cfg_target_linux_kernel" "$kernel"
-        cp -v "$cfg_target_linux_kernel" "$cfg_dir_rootfs/boot/kernel"
-    fi
+        $cmd_cp "$cfg_target_linux_kernel" "$pkg_dir_target/boot/kernel"
+    fi &&
 
     # Device tree blob.
     if [ -n "$cfg_target_linux_dtb" ]; then
-        cp -v "$cfg_target_linux_dtb" "$cfg_dir_rootfs/boot/board.dtb"
-    fi
+        $cmd_cp "$cfg_target_linux_dtb" "$pkg_dir_target/boot/board.dtb"
+    fi &&
 
+    # Modules.
     $cmd_make \
         CROSS_COMPILE="$cfg_target_canonical-" \
         ARCH="$cfg_target_linux" \
-        INSTALL_MOD_PATH="$cfg_dir_rootfs/usr" \
-        modules_install
+        INSTALL_MOD_PATH="$pkg_dir_target" \
+        modules_install &&
 
+    # Firmware.
     $cmd_make \
         CROSS_COMPILE="$cfg_target_canonical-" \
         ARCH="$cfg_target_linux" \
-        INSTALL_MOD_PATH="$cfg_dir_rootfs/usr" \
+        INSTALL_MOD_PATH="$pkg_dir_target" \
         firmware_install
 }

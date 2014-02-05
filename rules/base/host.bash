@@ -20,6 +20,7 @@ requires=\
     'pkg-config/host'
     'util-linux/host'
     'automake/host'
+    'libtool/host'
     'make/host'
     'gawk/host'
     'texinfo/host'

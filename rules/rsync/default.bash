@@ -29,7 +29,7 @@ configure()
         --target="$cfg_target_canonical" \
         --host="$cfg_target_canonical" \
         --build="$cfg_host_canonical" \
-        --prefix="$cfg_dir_rootfs/usr" \
+        --prefix="/" \
         --disable-ipv6 \
         --disable-locale \
         --disable-debug \
@@ -44,7 +44,21 @@ build()
     $cmd_make
 }
 
-target_install()
+install()
 {
-    $cmd_target_strip rsync -o "$cfg_dir_rootfs/usr/bin/rsync"
+    # Host.
+    $cmd_make \
+        prefix="$pkg_dir_sysroot" \
+        install &&
+
+    rm -rf \
+        "$pkg_dir_sysroot/share" &&
+
+    # Target.
+    $cmd_mkdir \
+        "$pkg_dir_target/bin" &&
+
+    $cmd_target_strip \
+        "$pkg_dir_sysroot/bin/rsync" \
+        -o "$pkg_dir_target/bin/rsync"
 }

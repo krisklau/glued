@@ -1,6 +1,6 @@
 version=\
 (
-    '1.2.0'
+    '1.7.0'
 )
 
 url=\
@@ -10,7 +10,7 @@ url=\
 
 md5=\
 (
-    '78eb1e984f4532aa9f2bdd3c127b5b61'
+    '32893941d40d052a5e649efcf06aca06'
 )
 
 maintainer=\
@@ -20,20 +20,25 @@ maintainer=\
 
 requires=\
 (
+    'pcre/host'
     'glib/host'
+    'python2/host'
 )
 
 configure()
 {
+    pkg_config_env_host
+
     "../qemu-$version/configure" \
-        --prefix="$cfg_dir_toolchain" \
+        --prefix="/" \
+        --disable-xen \
         --disable-docs \
         --disable-system \
         --disable-kvm \
         --disable-bluez \
         --disable-curses \
-        --extra-cflags="-I$cfg_dir_toolchain/include" \
-        --extra-ldflags="-L$cfg_dir_toolchain/lib"
+        --extra-cflags="-I$cfg_dir_root/include" \
+        --extra-ldflags="-L$cfg_dir_root/lib"
 }
 
 build()
@@ -41,7 +46,9 @@ build()
     $cmd_make
 }
 
-host_install()
+install()
 {
-    $cmd_make install
+    $cmd_make \
+        DESTDIR="$pkg_dir_host" \
+        install
 }

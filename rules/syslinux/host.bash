@@ -1,10 +1,23 @@
-source $pkg_common
+source "$pkg_common"
 
-host_install()
+install()
 {
-    $cmd_make clean &&
+    $cmd_make \
+        clean &&
+
     $cmd_make &&
-    cp -d extlinux/extlinux ${cfg_dir_toolchain}/bin &&
-    mkdir -p ${cfg_dir_toolchain}/boot &&
-    cp -d mbr/mbr.bin ${cfg_dir_toolchain}/boot/mbr.bin
+
+    $cmd_mkdir \
+        "$pkg_dir_host/bin" &&
+
+    cp -v -d \
+        "extlinux/extlinux" \
+        "$pkg_dir_host/bin" &&
+
+    $cmd_mkdir \
+        "$pkg_dir_host/boot" &&
+
+    cp -v -d \
+        "mbr/mbr.bin" \
+        "$pkg_dir_host/boot"
 }

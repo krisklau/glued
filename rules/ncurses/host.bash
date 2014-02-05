@@ -1,21 +1,40 @@
-source $pkg_common
+source "$pkg_common"
 
 configure()
 {
-    cd "$pkg_build_dir" &&
-    tar -C "../ncurses-$version" -c -f - . | tar -x -f - &&
-    ./configure \
-        --prefix="$cfg_dir_toolchain" \
-	--disable-nls \
-        --with-shared
+    $cmd_make \
+        distclean > /dev/null 2>&1
+
+    "../ncurses-$version/configure" \
+        --prefix="$cfg_dir_root" \
+	--with-shared \
+	--enable-pc-files \
+	--without-progs \
+	--without-tests \
+	--without-profile \
+	--without-debug \
+        --without-manpages \
+        --without-ada \
+	--disable-big-core \
+	--disable-rpath \
+        --disable-nls \
+	--enable-echo \
+	--enable-const \
+	--enable-overwrite \
+        --enable-widec
 }
 
 build()
 {
-    $cmd_make -C "$pkg_build_dir"
+    $cmd_make
 }
 
-host_install()
+install()
 {
-    $cmd_make -C "$pkg_build_dir" install
+    $cmd_make \
+        prefix="$pkg_dir_host" \
+        install &&
+
+    rm -rf \
+        "$pkg_dir_host/man"
 }

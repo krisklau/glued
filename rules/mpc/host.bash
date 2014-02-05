@@ -1,6 +1,6 @@
 version=\
 (
-    "0.9"
+    '0.9'
 )
 
 url=\
@@ -10,26 +10,25 @@ url=\
 
 md5=\
 (
-    "0d6acab8d214bd7d1fbbc593e83dd00d"
+    '0d6acab8d214bd7d1fbbc593e83dd00d'
 )
 
 maintainer=\
 (
-    "Ricardo Martins <rasm@fe.up.pt>"
+    'Ricardo Martins <rasm@fe.up.pt>'
 )
 
 requires=\
 (
     'mpfr/host'
-    'gmp/host'
 )
 
 configure()
 {
     ./configure \
-        --prefix="${cfg_dir_toolchain}" \
-        --with-gmp="${cfg_dir_toolchain}" \
-        --with-mpfr="${cfg_dir_toolchain}" \
+        --prefix="$cfg_dir_root" \
+        --with-gmp="$cfg_dir_root" \
+        --with-mpfr="$cfg_dir_root" \
         --disable-shared \
         --enable-static
 }
@@ -39,7 +38,12 @@ build()
     $cmd_make
 }
 
-host_install()
+install()
 {
-    $cmd_make install
+    $cmd_make \
+        prefix="$pkg_dir_host" \
+        install &&
+
+    rm -rf \
+        "$pkg_dir_host/share"
 }

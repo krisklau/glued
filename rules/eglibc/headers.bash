@@ -1,4 +1,4 @@
-source $pkg_common
+source "$pkg_common"
 
 requires=\
 (
@@ -6,19 +6,40 @@ requires=\
     'linux-headers/cross'
 )
 
-host_install()
+install()
 {
     cat >> configparms << EOF
 install-bootstrap-headers=yes
 cross-compiling=yes
-install_root="$cfg_dir_toolchain_sysroot"
+install_root="$pkg_dir_sysroot"
 EOF
 
+    $cmd_mkdir \
+        "$pkg_dir_sysroot" &&
+
+    ln -fs \
+        . \
+        "$pkg_dir_sysroot/usr" &&
+
     $cmd_make \
-        install_root="$cfg_dir_toolchain_sysroot" \
-        install-bootstrap-headers=yes install-headers &&
-    $cmd_mkdir "$cfg_dir_toolchain_sysroot/usr/lib" &&
-    $cmd_make csu/subdir_lib &&
-    cp csu/crt1.o csu/crti.o csu/crtn.o "$cfg_dir_toolchain_sysroot/usr/lib" &&
-    $cmd_target_cc -nostdlib -nostartfiles -shared -x c /dev/null -o "$cfg_dir_toolchain_sysroot/usr/lib/libc.so"
+        install-bootstrap-headers=yes \
+        install-headers &&
+
+    $cmd_make \
+        csu/subdir_lib &&
+
+    $cmd_mkdir \
+        "$pkg_dir_sysroot/lib" &&
+
+    cp -v \
+        csu/crt1.o \
+        csu/crti.o \
+        csu/crtn.o \
+        "$pkg_dir_sysroot/lib" &&
+
+    $cmd_target_cc \
+        -nostdlib \
+        -nostartfiles \
+        -shared \
+        -x c /dev/null -o "$pkg_dir_sysroot/lib/libc.so"
 }

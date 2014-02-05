@@ -1,6 +1,6 @@
 version=\
 (
-    '1.22.0'
+    '1.22.1'
 )
 
 url=\
@@ -10,7 +10,7 @@ url=\
 
 md5=\
 (
-    'ac1881d1cdeb0729b22c663feaf1c663'
+    '337d1a15ab1cb1d4ed423168b1eb7d7e'
 )
 
 post_unpack()
@@ -24,17 +24,38 @@ post_unpack()
 
 configure()
 {
-    cp "$pkg_dir"/config .config &&
-    yes '' | $cmd_make CROSS_COMPILE="$cfg_target_canonical"- oldconfig
+    $cmd_cp \
+        "$pkg_dir/config" \
+        .config &&
+
+    yes '' | $cmd_make \
+        CROSS_COMPILE="$cfg_target_canonical"- \
+        oldconfig
 }
 
 build()
 {
-    $cmd_make CROSS_COMPILE="$cfg_target_canonical"-
+    $cmd_make \
+        CROSS_COMPILE="$cfg_target_canonical"-
 }
 
 target_install()
 {
-    $cmd_make CROSS_COMPILE="$cfg_target_canonical"- CONFIG_PREFIX=$cfg_dir_rootfs install &&
-    tar -C "$pkg_dir/fs" --exclude .svn -c -f - . | tar -C "$cfg_dir_rootfs" -x -v -f -
+    # Host.
+    $cmd_mkdir \
+        "$pkg_dir_sysroot" &&
+
+    $cmd_make \
+        CROSS_COMPILE="$cfg_target_canonical"- \
+        CONFIG_PREFIX="$pkg_dir_sysroot" \
+        install &&
+
+    # Target
+    $cmd_cp \
+        "$pkg_dir_sysroot/"* \
+        "$pkg_dir_target" &&
+
+    $cmd_cp \
+        "$pkg_dir/fs/"* \
+        "$pkg_dir_target"
 }

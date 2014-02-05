@@ -1,6 +1,6 @@
 version=\
 (
-    '1.4.16'
+    '1.4.17'
 )
 
 url=\
@@ -10,7 +10,7 @@ url=\
 
 md5=\
 (
-    '8a7cef47fecab6272eb86a6be6363b2f'
+    '8a1787edcba75ae5cd1dc40d7d8ed03a'
 )
 
 maintainer=\
@@ -20,7 +20,7 @@ maintainer=\
 
 post_unpack()
 {
-    patches=$(ls "$pkg_dir/patches/"*.patch)
+    patches=$(ls "$cfg_package_spec_dir/patches/"*.patch)
     if [ -n "$patches" ]; then
         cd "../m4-$version" && cat $patches | patch -p1
     fi
@@ -29,7 +29,7 @@ post_unpack()
 configure()
 {
     ./configure \
-        --prefix="$cfg_dir_toolchain" \
+        --prefix="$cfg_dir_root" \
         --disable-shared \
         --enable-static
 }
@@ -39,7 +39,12 @@ build()
     $cmd_make
 }
 
-host_install()
+install()
 {
-    $cmd_make install
+    $cmd_make \
+        prefix="$pkg_dir_host" \
+        install &&
+
+    rm -rf \
+        "$pkg_dir_host/share"
 }

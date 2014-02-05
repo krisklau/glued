@@ -22,12 +22,16 @@ build()
 {
     CC="$cmd_host_cc" \
         $cmd_make \
-        PREFIX="$cfg_dir_toolchain"
+        PREFIX="$cfg_dir_root"
 }
 
-host_install()
+install()
 {
     CC="$cmd_host_cc" \
         $cmd_make \
-        PREFIX="$cfg_dir_toolchain" install
+        PREFIX="$pkg_dir_host" \
+        install &&
+
+    rm -rf \
+        "$pkg_dir_host/share"
 }

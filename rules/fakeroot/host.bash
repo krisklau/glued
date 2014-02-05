@@ -21,9 +21,10 @@ maintainer=\
 configure()
 {
     "../fakeroot-$version/configure" \
-        --prefix="$cfg_dir_toolchain" \
+        --prefix="$cfg_dir_root" \
         --disable-static \
-        --enable-shared
+        --enable-shared \
+        --disable-nls
 }
 
 build()
@@ -31,7 +32,12 @@ build()
     $cmd_make
 }
 
-host_install()
+install()
 {
-    $cmd_make install
+    $cmd_make \
+        prefix="$pkg_dir_host" \
+        install &&
+
+    rm -rf \
+        "$pkg_dir_host/share"
 }

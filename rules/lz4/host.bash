@@ -26,7 +26,15 @@ build()
 
 host_install()
 {
-    $cmd_mkdir "$cfg_dir_toolchain/bin"
-    cd "../lz4-r$version" &&
-    cp -v programs/{lz4,lz4c} "$cfg_dir_toolchain/bin"
+    # Host.
+    prefix="$pkg_dir_host/bin"
+
+    $cmd_mkdir "$prefix" &&
+    strip -v --strip-unneeded \
+        "../lz4-r$version/programs/lz4" \
+        -o "$prefix/lz4" &&
+
+    strip -v --strip-unneeded \
+        "../lz4-r$version/programs/lz4c" \
+        -o "$prefix/lz4c"
 }

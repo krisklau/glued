@@ -1,9 +1,9 @@
-source $pkg_common
+source $PKG_COMMON
 
 requires=\
 (
-    'readline/default'
-    'ncurses/default'
+    'readline/target'
+    'ncurses/target'
 )
 
 configure()

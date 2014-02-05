@@ -15,10 +15,10 @@ md5=\
 
 configure()
 {
-    export CC=$cmd_target_cc
-    export CROSS_COMPILE=$cfg_target_canonical
+    export CC="$cmd_target_cc"
+    export CROSS_COMPILE="$cfg_target_canonical"
     "../e2fsprogs-$version/configure" \
-        --prefix="$cfg_dir_rootfs" \
+        --prefix="/" \
         --host="$cfg_target_canonical" \
         --build="$cfg_host_canonical" \
         --disable-nls
@@ -29,9 +29,22 @@ build()
     $cmd_make
 }
 
-target_install()
+host_install()
 {
-    $cmd_target_strip --strip-unneeded ../e2fsprogs-$version/e2fsck/e2fsck -o $cfg_dir_rootfs/sbin/e2fsck &&
-    $cmd_target_strip --strip-unneeded ../e2fsprogs-$version/misc/mke2fs -o $cfg_dir_rootfs/sbin/mke2fs &&
-    $cmd_target_strip --strip-unneeded ../e2fsprogs-$version/misc/tune2fs -o $cfg_dir_rootfs/sbin/tune2fs
+    # Host.
+    $cmd_make \
+        prefix="$pkg_dir_sysroot" \
+        install &&
+
+    rm -rf \
+        "$pkg_dir_sysroot/share" &&
+
+    # Target.
+    $cmd_mkdir \
+        "$pkg_dir_target/sbin" &&
+
+    for p in e2fsck mke2fs tune2fs; do
+        $cmd_target_strip \
+            "$pkg_dir_sysroot/sbin/$p" -o "$pkg_dir_target/sbin/$p"
+    done
 }

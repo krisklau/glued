@@ -1,36 +1,24 @@
-version=\
-(
-    '2.32.4'
-)
-
-url=\
-(
-    "http://ftp.gnome.org/pub/gnome/sources/glib/2.32/glib-$version.tar.xz"
-)
-
-md5=\
-(
-    'bf84fefd9c1a5b5a7a38736f4ddd674a'
-)
-
-maintainer=\
-(
-    'Ricardo Martins <rasm@fe.up.pt>'
-)
+source "$pkg_common"
 
 requires=\
 (
     'libffi/host'
     'gettext/host'
     'zlib/host'
-    'python_host/host'
+    'python2/host'
 )
 
 configure()
 {
-    PKG_CONFIG_PATH="$cfg_dir_toolchain/lib/pkgconfig" \
-        "./configure" \
-        --prefix="$cfg_dir_toolchain"
+    pkg_config_env_host
+
+    "./configure" \
+        --prefix="$cfg_dir_root" \
+        --enable-man=no \
+        --enable-gtk-doc=no \
+        --enable-gtk-doc-html=no \
+        --enable-gtk-doc-pdf=no \
+        --disable-nls
 }
 
 build()
@@ -38,7 +26,15 @@ build()
     $cmd_make
 }
 
-host_install()
+install()
 {
-    $cmd_make install
+    $cmd_make \
+        prefix="$pkg_dir_host" \
+        install &&
+
+    rm -rf \
+        "$pkg_dir_host/share/locale" \
+        "$pkg_dir_host/share/gtk-doc" \
+        "$pkg_dir_host/share/bash-completion" \
+        "$pkg_dir_host/share/gdb"
 }

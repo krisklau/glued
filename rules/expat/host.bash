@@ -1,32 +1,27 @@
 source "$pkg_common"
 
-require=\
-(
-    'zlib/host'
-)
-
 configure()
 {
     $cmd_make \
-        distclean
+        distclean > /dev/null 2>&1
 
-    ./configure \
-        --shared \
-        --prefix="$cfg_dir_root"
+    "../expat-$version/configure" \
+        --enable-static \
+        --enable-shared
 }
 
 build()
 {
-    $cmd_make -j1
+    $cmd_make
 }
 
 install()
 {
     $cmd_make \
-        -j1 \
         prefix="$pkg_dir_host" \
         install &&
 
     rm -rf \
+        "$pkg_dir_host/man" \
         "$pkg_dir_host/share"
 }

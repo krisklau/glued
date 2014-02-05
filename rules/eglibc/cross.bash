@@ -1,4 +1,4 @@
-source $pkg_common
+source "$pkg_common"
 
 requires=\
 (
@@ -7,31 +7,79 @@ requires=\
 
 build()
 {
-    $cmd_make -j1
+    $cmd_make
 }
 
-host_install()
+install()
 {
-    $cmd_make install_root="$cfg_dir_toolchain_sysroot" -j1 install &&
-    cp "$pkg_dir"/files/timepps.h "$cfg_dir_toolchain_sysroot/usr/include"
-}
-
-target_install()
-{
+    # Host.
     $cmd_mkdir \
-        "$cfg_dir_rootfs/sbin" \
-        "$cfg_dir_rootfs/usr/lib" &&
+        "$pkg_dir_sysroot" &&
 
-    for f in "$cfg_dir_toolchain_sysroot/lib"/*; do
-        base="$(basename $f)"
-        if [ -L "$f" ]; then
-            cp -vd "$f" "$cfg_dir_rootfs/usr/lib/$base"
-        elif [ -f "$f" ]; then
-            $cmd_target_strip -v --strip-unneeded -o "$cfg_dir_rootfs/usr/lib/$base" "$f"
-        fi
+    ln -nfs \
+        . \
+        "$pkg_dir_sysroot/usr" &&
+
+    $cmd_make \
+        -j1\
+        install_root="$pkg_dir_sysroot" \
+        install &&
+
+    $cmd_cp \
+        "$pkg_dir/files/timepps.h" \
+        "$pkg_dir_sysroot/include" &&
+
+    # Locales.
+    $cmd_mkdir \
+        "localedef" &&
+
+    cd localedef &&
+
+    "../../eglibc-$version/localedef/configure" \
+        --prefix="$pkg_dir_sysroot" \
+        --localedir="$pkg_dir_sysroot/lib/locale" \
+        --with-glibc="$pkg_dir_build/../eglibc-$version/libc" &&
+
+    $cmd_make && cd -
+
+    charmap_utf8="$pkg_dir_sysroot/share/i18n/charmaps/UTF-8.gz"
+    if [ -f "$charmap_utf8" ]; then
+        gunzip -f "$charmap_utf8"
+    fi &&
+
+    $cmd_mkdir \
+        "$pkg_dir_sysroot/lib/locale" &&
+
+    for l in pt_PT ru_RU; do
+        ./localedef/localedef -v -c -i "$l" -f UTF-8 "$l"
     done
 
-    $cmd_target_strip -v --strip-unneeded "elf/ldconfig" \
-        -o "$cfg_dir_rootfs/sbin/ldconfig" &&
-    tar -C "$pkg_dir/fs" --exclude .svn -c -f - . | tar -C "$cfg_dir_rootfs" -x -v -f -
+    # Target.
+    $cmd_mkdir \
+        "$pkg_dir_target/sbin" \
+        "$pkg_dir_target/lib" &&
+
+    find "$pkg_dir_sysroot/lib" -maxdepth 1 -type f -name '*.so*' | while read f; do
+        base="$(basename "$f")"
+        $cmd_target_strip "$f" -o "$pkg_dir_target/lib/$base"
+    done &&
+
+    find "$pkg_dir_sysroot/lib" -maxdepth 1 -type l -name '*.so*' | while read f; do
+        $cmd_cp "$f" "$pkg_dir_target/lib"
+    done &&
+
+    $cmd_target_strip \
+        "$pkg_dir_sysroot/sbin/ldconfig" \
+        -o "$pkg_dir_target/sbin/ldconfig" &&
+
+    $cmd_mkdir \
+        "$pkg_dir_target/lib/locale" &&
+
+    $cmd_cp \
+        "$pkg_dir_sysroot/lib/locale/locale-archive" \
+        "$pkg_dir_target/lib/locale" &&
+
+    $cmd_cp \
+        "$pkg_dir/fs/"* \
+        "$pkg_dir_target"
 }

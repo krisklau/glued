@@ -21,7 +21,9 @@ maintainer=\
 configure()
 {
     ./configure \
-        --prefix="$cfg_dir_toolchain"
+        --prefix="$cfg_dir_root" \
+        --disable-shared \
+        --enable-static
 }
 
 build()
@@ -31,6 +33,18 @@ build()
 
 host_install()
 {
-    $cmd_make install &&
-    ln -fs kmod "$cfg_dir_toolchain/sbin/depmod"
+    # Host.
+    $cmd_make \
+        prefix="$pkg_dir_host" \
+        install &&
+
+    $cmd_mkdir \
+        "$pkg_dir_host/sbin" &&
+
+    ln -fs \
+        "kmod" \
+        "$pkg_dir_host/sbin/depmod" &&
+
+    rm -rf \
+        "$pkg_dir_host/share"
 }

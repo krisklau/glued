@@ -1,6 +1,6 @@
 version=\
 (
-    "1.0.6"
+    '1.0.6'
 )
 
 url=\
@@ -10,16 +10,15 @@ url=\
 
 md5=\
 (
-    "00b516f4704d4a7cb50a1d97e6e8e15b"
+    '00b516f4704d4a7cb50a1d97e6e8e15b'
 )
 
 post_unpack()
 {
-        sed -i 's/CFLAGS=/CFLAGS+=/;' Makefile Makefile-libbz2_so
+    sed -i 's/CFLAGS=/CFLAGS+=/;' Makefile Makefile-libbz2_so
 }
-
 
 maintainer=\
 (
-    "Ricardo Martins <rasm@fe.up.pt>"
+    'Ricardo Martins <rasm@fe.up.pt>'
 )

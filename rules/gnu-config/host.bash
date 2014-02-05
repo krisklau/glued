@@ -18,10 +18,15 @@ maintainer=\
     'Ricardo Martins <rasm@fe.up.pt>'
 )
 
-host_install()
+install()
 {
-    dir="$cfg_dir_toolchain/share/gnu-config"
-    $cmd_mkdir "$dir" &&
-    cp -v "../gnu-config-$version/config.sub" "$dir" &&
-    cp -v "../gnu-config-$version/config.guess" "$dir"
+    dir="$pkg_dir_host/share/gnu-config"
+
+    $cmd_mkdir \
+        "$dir" &&
+
+    $cmd_cp \
+        "../gnu-config-$version/config.sub" \
+        "../gnu-config-$version/config.guess" \
+        "$dir"
 }

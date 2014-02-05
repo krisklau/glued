@@ -15,7 +15,7 @@ md5=\
 
 maintainer=\
 (
-    "Ricardo Martins <rasm@fe.up.pt>"
+    'Ricardo Martins <rasm@fe.up.pt>'
 )
 
 requires=\
@@ -26,7 +26,7 @@ requires=\
 configure()
 {
     "../autoconf-$version/configure" \
-        --prefix="$cfg_dir_toolchain"
+        --prefix="$cfg_dir_root"
 }
 
 build()
@@ -34,7 +34,14 @@ build()
     $cmd_make
 }
 
-host_install()
+install()
 {
-    $cmd_make install
+    $cmd_make \
+        prefix="$pkg_dir_host" \
+        install &&
+
+    rm -rf \
+        "$pkg_dir_host/share/info" \
+        "$pkg_dir_host/share/emacs" \
+        "$pkg_dir_host/share/man"
 }

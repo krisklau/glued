@@ -1,6 +1,6 @@
 version=\
 (
-    "0.25"
+    '0.25'
 )
 
 url=\
@@ -10,18 +10,18 @@ url=\
 
 md5=\
 (
-    "a3270bab3f4b69b7dc6dbdacbcae9745"
+    'a3270bab3f4b69b7dc6dbdacbcae9745'
 )
 
 maintainer=\
 (
-    "Ricardo Martins <rasm@fe.up.pt>"
+    'Ricardo Martins <rasm@fe.up.pt>'
 )
 
 configure()
 {
     ./configure \
-        --prefix="${cfg_dir_toolchain}" \
+        --prefix="$cfg_dir_root" \
         --disable-shared \
         --enable-static
 }
@@ -31,7 +31,13 @@ build()
     $cmd_make
 }
 
-host_install()
+install()
 {
-    $cmd_make install
+    $cmd_make \
+        prefix="$pkg_dir_host" \
+        install &&
+
+    rm -rf \
+        "$pkg_dir_host/share/man" \
+        "$pkg_dir_host/share/doc"
 }

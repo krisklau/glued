@@ -1,16 +1,16 @@
 version=\
 (
-    '4.1.0'
+    '2.4.2'
 )
 
 url=\
 (
-    "http://ftp.gnu.org/gnu/gawk/gawk-$version.tar.xz"
+    "http://ftp.gnu.org/gnu/libtool/libtool-$version.tar.xz"
 )
 
 md5=\
 (
-    'b18992ff8faf3217dab55d2d0aa7d707'
+    '2ec8997e0c07249eb4cbd072417d70fe'
 )
 
 maintainer=\
@@ -20,18 +20,13 @@ maintainer=\
 
 requires=\
 (
-    'readline/host'
-    'mpfr/host'
+    'm4/host'
 )
 
 configure()
 {
-    ./configure \
-        --prefix="$cfg_dir_root" \
-        --disable-nls \
-        --enable-static \
-        --disable-shared \
-        --with-mpfr="$cfg_dir_root"
+    "../libtool-$version/configure" \
+        --prefix="$cfg_dir_root"
 }
 
 build()
@@ -47,5 +42,6 @@ install()
 
     rm -rf \
         "$pkg_dir_host/share/info" \
+        "$pkg_dir_host/share/emacs" \
         "$pkg_dir_host/share/man"
 }

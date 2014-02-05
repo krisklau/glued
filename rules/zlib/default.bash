@@ -2,12 +2,12 @@ source "$pkg_common"
 
 configure()
 {
-    make distclean
+    $cmd_make distclean > /dev/null 2>&1
 
     CC="$cmd_target_cc" \
         ./configure \
-        --shared \
-        --prefix="$cfg_dir_toolchain_sysroot/usr"
+        --prefix="/" \
+        --shared
 }
 
 build()
@@ -15,13 +15,25 @@ build()
     $cmd_make -j1
 }
 
-host_install()
+install()
 {
-    $cmd_make -j1 install
-}
+    # Host.
+    $cmd_make \
+        prefix="$pkg_dir_sysroot" \
+        -j1 \
+        install &&
 
-target_install()
-{
-    cp -a libz.so* "$cfg_dir_rootfs/lib"
-    $cmd_target_strip "$cfg_dir_rootfs/lib/libz.so"*
+    rm -rf \
+        "$pkg_dir_sysroot/share" &&
+
+    # Target.
+    $cmd_mkdir \
+        "$pkg_dir_target/lib" &&
+
+    $cmd_cp \
+        libz.so* \
+        "$pkg_dir_target/lib" &&
+
+    $cmd_target_strip \
+        "$pkg_dir_target/lib/libz.so"*
 }

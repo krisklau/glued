@@ -20,15 +20,21 @@ maintainer=\
 
 configure()
 {
-    $cmd_make -C "../linux-$version" \
+    $cmd_make \
+        -C "../linux-$version" \
         ARCH="$cfg_target_linux" \
         distclean mrproper
 }
 
 host_install()
 {
-    $cmd_make -C "../linux-$version" \
+    $cmd_make \
+        -C "../linux-$version" \
         ARCH="$cfg_target_linux" \
-        INSTALL_HDR_PATH="$cfg_dir_toolchain_sysroot/usr" \
-        headers_install
+        INSTALL_HDR_PATH="$pkg_dir_sysroot" \
+        headers_install &&
+
+    ln -fs \
+        . \
+        "$pkg_dir_sysroot/usr"
 }

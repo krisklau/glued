@@ -1,4 +1,4 @@
-source $pkg_common
+source "$pkg_common"
 
 requires=\
 (
@@ -8,19 +8,19 @@ requires=\
 configure()
 {
     MAKEINFO='/bin/true' \
-    "../gcc-$version/configure" $cfg_target_gcc_configure_flags \
+        "../gcc-$version/configure" $cfg_target_gcc_configure_flags \
         --target="$cfg_target_canonical" \
-        --prefix="$cfg_dir_toolchain" \
-        --with-sysroot="$cfg_dir_toolchain_sysroot" \
-        --with-mpfr="$cfg_dir_toolchain" \
-        --with-gmp="$cfg_dir_toolchain" \
-        --with-mpc="$cfg_dir_toolchain" \
-        --enable-__cxa_atexit \
+        --prefix="/" \
+        --with-sysroot="$cfg_dir_sysroot" \
+        --with-mpfr="$cfg_dir_root" \
+        --with-gmp="$cfg_dir_root" \
+        --with-mpc="$cfg_dir_root" \
         --disable-libssp \
         --disable-libgomp \
         --disable-libmudflap \
         --disable-nls \
         --disable-multilib \
+        --enable-__cxa_atexit \
         --enable-languages=c,c++
 }
 
@@ -31,32 +31,37 @@ build()
 
 host_install()
 {
-    $cmd_make install &&
-
-    cp -d \
-        "$cfg_dir_toolchain/$cfg_target_canonical/lib/"libgcc_s.so* \
-        "$cfg_dir_toolchain_sysroot/lib" &&
-    cp -d \
-        "$cfg_dir_toolchain/$cfg_target_canonical/lib/"libstdc++.so* \
-        "$cfg_dir_toolchain_sysroot/usr/lib"
-}
-
-target_install()
-{
+    # Host.
     $cmd_mkdir \
-        "$cfg_dir_rootfs/usr/lib" &&
+        "$pkg_dir_sysroot" &&
 
-    for f in "$cfg_dir_toolchain/$cfg_target_canonical/lib/"{libgcc_s,libstdc++}.so*; do
-        base="$(basename $f)"
+    ln -fs \
+        . \
+        "$pkg_dir_sysroot/usr" &&
 
-        if [ $(echo "$base" | grep '\.py' 2> /dev/null) ]; then
-            continue
-        fi
+    $cmd_make \
+        DESTDIR="$pkg_dir_host" \
+        install &&
 
-        if [ -L "$f" ]; then
-            cp -vd "$f" "$cfg_dir_rootfs/usr/lib/$base"
-        elif [ -f "$f" ]; then
-            $cmd_target_strip -v --strip-unneeded -o "$cfg_dir_rootfs/usr/lib/$base" "$f"
-        fi
-    done
+    rm -rf \
+        "$pkg_dir_host/share" \
+        "$pkg_dir_host/include" \
+        "$pkg_dir_host/lib/libiberty.a" &&
+
+    # Target.
+    $cmd_mkdir \
+        "$pkg_dir_target/lib" &&
+
+    $cmd_cp \
+        "$pkg_dir_host/$cfg_target_canonical/lib/libgcc_s.so"* \
+        "$pkg_dir_host/$cfg_target_canonical/lib/libstdc++.so"* \
+        "$pkg_dir_target/lib" &&
+
+    rm -rf \
+        "$pkg_dir_target/lib/"*.py &&
+
+    chmod 0755 \
+        "$pkg_dir_target/lib/"* &&
+
+    $cmd_target_strip "$pkg_dir_target/lib/"*
 }

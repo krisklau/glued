@@ -36,15 +36,15 @@ configure()
 {
     export libc_cv_slibdir='/lib'
     BUILD_CC=$cmd_host_cc \
-        AR="$cfg_dir_toolchain/bin/$cfg_target_canonical-ar" \
-        RANLIB="$cfg_dir_toolchain/bin/$cfg_target_canonical-ranlib" \
-        CC="$cfg_dir_toolchain/bin/$cfg_target_canonical-gcc" \
-        CXX="$cfg_dir_toolchain/bin/$cfg_target_canonical-g++" \
+        AR="$cmd_target_ar" \
+        RANLIB="$cmd_target_ranlib" \
+        CC="$cmd_target_cc" \
+        CXX="$cmd_target_cxx" \
         CFLAGS=$cfg_target_gcc_flags \
         "../eglibc-$version/libc/configure" \
         $cfg_target_eglibc_configure_flags \
-        --prefix=/usr \
-        --with-headers="$cfg_dir_toolchain_sysroot/usr/include" \
+        --prefix=/ \
+        --with-headers="$cfg_dir_sysroot/include" \
         --build="$cfg_host_canonical" \
         --host="$cfg_target_canonical" \
         --disable-profile \
@@ -52,6 +52,6 @@ configure()
         --without-cvs \
         --enable-add-ons \
         --with-tls \
-        --enable-kernel=2.6.32 \
+        --enable-kernel=3.10 \
         --disable-nls
 }

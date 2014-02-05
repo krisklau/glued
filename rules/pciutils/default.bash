@@ -1,6 +1,6 @@
 version=\
 (
-    "3.1.8"
+    '3.1.8'
 )
 
 url=\
@@ -10,36 +10,53 @@ url=\
 
 md5=\
 (
-    "79312f138311d29291c7d44d624cd37e"
+    '79312f138311d29291c7d44d624cd37e'
 )
 
 maintainer=\
 (
-    "Ricardo Martins <rasm@fe.up.pt>"
+    'Ricardo Martins <rasm@fe.up.pt>'
 )
 
 build()
 {
     $cmd_make \
-        CC=$cmd_target_cc \
+        CC="$cmd_target_cc" \
         ZLIB=yes \
-        PREFIX=/usr \
-        SHAREDIR=/usr/share/pciutils
+        PREFIX="/" \
+        SHAREDIR="/share/pciutils"
 }
 
 host_install()
 {
+    # Host.
     $cmd_make \
-        CC=$cmd_target_cc \
-        INCDIR="$cfg_dir_toolchain_sysroot/usr/include" \
-        LIBDIR="$cfg_dir_toolchain_sysroot/usr/lib" \
-        install-lib
-}
+        CC="$cmd_target_cc" \
+        PREFIX="$pkg_dir_sysroot" \
+        install \
+        install-lib &&
 
-target_install()
-{
-    mkdir -p "$cfg_dir_rootfs/usr/share/pciutils" &&
-    cp pci.ids.gz "$cfg_dir_rootfs/usr/share/pciutils" &&
-    $cmd_target_strip lspci -o $cfg_dir_rootfs/usr/bin/lspci &&
-    $cmd_target_strip setpci -o $cfg_dir_rootfs/usr/bin/setpci
+    rm -rf \
+        "$pkg_dir_sysroot/man" &&
+
+    $cmd_mkdir \
+        "$pkg_dir_sysroot/share/pciutils" &&
+
+    mv "$pkg_dir_sysroot/share/pci.ids.gz" \
+        "$pkg_dir_sysroot/share/pciutils" &&
+
+    # Target
+    $cmd_mkdir \
+        "$pkg_dir_target/sbin" \
+        "$pkg_dir_target/share/pciutils" &&
+
+    for p in lspci setpci; do
+        $cmd_target_strip \
+            "$pkg_dir_sysroot/sbin/$p" \
+            -o "$pkg_dir_target/sbin/$p"
+    done &&
+
+    $cmd_cp \
+        "$pkg_dir_sysroot/share/pciutils/pci.ids.gz" \
+        "$pkg_dir_target/share/pciutils"
 }

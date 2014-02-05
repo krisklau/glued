@@ -21,7 +21,8 @@ maintainer=\
 configure()
 {
     "../gettext-$version/configure" \
-        --prefix="$cfg_dir_toolchain"
+        --prefix="/" \
+        --disable-nls
 }
 
 build()
@@ -31,5 +32,13 @@ build()
 
 host_install()
 {
-    $cmd_make install
+    $cmd_make \
+        DESTDIR="$pkg_dir_host" \
+        install &&
+
+    rm -rf \
+        "$pkg_host_dir/share/man" \
+        "$pkg_host_dir/share/info" \
+        "$pkg_host_dir/share/doc" \
+        "$pkg_host_dir/share/emacs"
 }

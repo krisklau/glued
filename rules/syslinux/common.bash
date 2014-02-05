@@ -21,5 +21,5 @@ maintainer=\
 requires=\
 (
     'nasm/host'
-    'python_host/host'
+    'python2/host'
 )

@@ -21,7 +21,10 @@ maintainer=\
 configure()
 {
     ./configure \
-        --prefix="$cfg_dir_toolchain"
+        --prefix="$cfg_dir_root" \
+        --disable-nls \
+        --disable-shared \
+        --enable-static
 }
 
 build()
@@ -29,7 +32,12 @@ build()
     $cmd_make
 }
 
-host_install()
+install()
 {
-    $cmd_make install
+    $cmd_make \
+        prefix="$pkg_dir_host" install &&
+
+    rm -rf \
+        "$pkg_dir_host/share" \
+        "$pkg_dir_host/include"
 }
