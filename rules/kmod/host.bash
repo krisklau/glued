@@ -41,7 +41,7 @@ host_install()
     $cmd_mkdir \
         "$pkg_dir_host/sbin" &&
 
-    ln -fs \
+    ln -nfs \
         "kmod" \
         "$pkg_dir_host/sbin/depmod" &&
 
