@@ -56,6 +56,7 @@ install()
 
     # Target.
     $cmd_mkdir \
+        "$pkg_dir_target/etc" \
         "$pkg_dir_target/sbin" \
         "$pkg_dir_target/lib" &&
 
@@ -78,6 +79,14 @@ install()
     $cmd_cp \
         "$pkg_dir_sysroot/lib/locale/locale-archive" \
         "$pkg_dir_target/lib/locale" &&
+
+    $cmd_cp \
+        "$pkg_dir_sysroot/etc/rpc" \
+        "$pkg_dir_target/etc" &&
+
+    $cmd_cp \
+        "$pkg_dir_sysroot/share/zoneinfo/Zulu" \
+        "$pkg_dir_target/etc/localtime" &&
 
     $cmd_cp \
         "$pkg_dir/fs/"* \
