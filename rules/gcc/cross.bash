@@ -29,13 +29,13 @@ build()
     $cmd_make
 }
 
-host_install()
+install()
 {
     # Host.
     $cmd_mkdir \
         "$pkg_dir_sysroot" &&
 
-    ln -fs \
+    ln -nfs \
         . \
         "$pkg_dir_sysroot/usr" &&
 
@@ -63,5 +63,7 @@ host_install()
     chmod 0755 \
         "$pkg_dir_target/lib/"* &&
 
-    $cmd_target_strip "$pkg_dir_target/lib/"*
+    find "$pkg_target_dir/lib". -type f -name '*.so*' | while read f; do
+        $cmd_target_strip "$f"
+    done
 }
