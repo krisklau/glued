@@ -109,8 +109,10 @@ fi
 cfg_sys_family="$family_name"
 # Config: GLUED source tree base path.
 cfg_dir_base="$PWD"
+# Config: workspace folder.
+cfg_dir_workspace="$cfg_dir_base/workspace"
 # Config: installation root folder.
-cfg_dir_root="$cfg_dir_base/root"
+cfg_dir_root="$cfg_dir_workspace/root"
 # Config: system configuration folder.
 cfg_dir_system="$cfg_dir_base/$family_dir"
 # Config: package rules folder.
@@ -120,9 +122,9 @@ cfg_dir_postconfiguration="$cfg_dir_base/postconfiguration"
 # Config: package sources folder.
 cfg_dir_downloads="$cfg_dir_base/downloads"
 # Config: build folder.
-cfg_dir_builds="$cfg_dir_base/$cfg_sys_family/builds"
+cfg_dir_builds="$cfg_dir_workspace/builds"
 # Config: packages destination folder.
-cfg_dir_packages="$cfg_dir_base/$cfg_sys_family/packages"
+cfg_dir_packages="$cfg_dir_workspace/packages"
 # Config: system root folder.
 cfg_dir_sysroot="$cfg_dir_root/$cfg_target_canonical/sysroot"
 # Target prefix:
@@ -158,18 +160,15 @@ cmd_make_single="make -j1"
 # Command: make command.
 cmd_make="make -j$cfg_host_cores"
 
-if ! [ -d "$cfg_sys_family" ]; then
-    mkdir -p "$cfg_sys_family"
-fi &&
-
 if ! [ -d "$cfg_dir_root" ]; then
     mkdir -p "$cfg_dir_root"
 fi &&
 
 # Save configuration values to file.
+cfg="$cfg_dir_workspace/$1.bash"
 set \
     | egrep '^cfg_|^cmd_' \
     | awk '{print "export " $0}' \
-    > "$cfg_sys_family/$1.bash"
+    > "$cfg"
 
-echo "Configuration file written to '$cfg_sys_family/$1.bash'"
+echo "Configuration file written to '$cfg'"
