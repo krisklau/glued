@@ -23,8 +23,17 @@ build()
     make CC="$cmd_target_cc" -C src
 }
 
-target_install()
+install()
 {
-    $cmd_target_strip src/ptpd2 -o $cfg_dir_rootfs/usr/bin/ptpd2 &&
-    tar -C "$pkg_dir/fs" --exclude .svn -c -f - . | tar -C "$cfg_dir_rootfs" -x -v -f -
+    # Target.
+    $cmd_mkdir \
+        "$pkg_dir_target/bin" &&
+
+    $cmd_target_strip \
+        "src/ptpd2" \
+        -o "$pkg_dir_target/bin/ptpd2" &&
+
+    $cmd_cp \
+        "$pkg_dir/fs"/* \
+        "$pkg_dir_target"
 }
