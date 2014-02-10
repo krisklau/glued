@@ -13,7 +13,7 @@ configure()
     pkg_config_env_host
 
     "./configure" \
-        --prefix="$cfg_dir_root" \
+        --prefix="/" \
         --enable-man=no \
         --enable-gtk-doc=no \
         --enable-gtk-doc-html=no \
@@ -29,7 +29,7 @@ build()
 install()
 {
     $cmd_make \
-        prefix="$pkg_dir_host" \
+        DESTDIR="$pkg_dir_host" \
         install &&
 
     rm -rf \
