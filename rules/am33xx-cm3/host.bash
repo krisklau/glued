@@ -25,6 +25,10 @@ unpack()
 
 host_install()
 {
-    $cmd_mkdir "$cfg_dir_toolchain/firmware"
-    cp -v "bin/am335x-pm-firmware.bin" "$cfg_dir_toolchain/firmware"
+    $cmd_mkdir \
+        "$pkg_dir_sysroot/firmware" &&
+
+    $cmd_cp \
+        "bin/am335x-pm-firmware.bin" \
+        "$pkg_dir_sysroot/firmware"
 }
