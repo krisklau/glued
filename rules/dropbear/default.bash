@@ -45,8 +45,7 @@ configure()
         --disable-lastlog \
         --target="$cfg_target_canonical" \
         --host="$cfg_target_canonical" \
-        --build="$cfg_host_canonical" \
-        --with-zlib="$cfg_dir_root"
+        --build="$cfg_host_canonical"
 }
 
 build()
