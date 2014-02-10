@@ -31,7 +31,7 @@ install()
         "$pkg_dir_target/lib" &&
 
     $cmd_cp \
-        libz.so* \
+        "libz.so"* \
         "$pkg_dir_target/lib" &&
 
     $cmd_target_strip \
