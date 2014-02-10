@@ -22,20 +22,25 @@ build()
         CROSS_COMPILE="$cfg_target_canonical"-
 }
 
-host_install()
+install()
 {
-    $cmd_cp \
-        tools/mkimage \
-        "$cfg_dir_toolchain/bin"
-}
+    # Host.
+    $cmd_mkdir \
+        "$pkg_dir_host/bin" &&
 
-target_install()
-{
+    $cmd_cp \
+        "tools/mkimage" \
+        "$pkg_dir_host/bin"
+
+    # Machine.
+    $cmd_mkdir \
+        "$pkg_dir_machine/boot" &&
+
     if [ -f MLO ]; then
-        $cmd_cp MLO "$cfg_dir_rootfs/boot"
-    fi
+        $cmd_cp MLO "$pkg_dir_machine/boot"
+    fi &&
 
     if [ -f u-boot.img ]; then
-        $cmd_cp u-boot.img "$cfg_dir_rootfs/boot"
+        $cmd_cp u-boot.img "$pkg_dir_machine/boot"
     fi
 }
