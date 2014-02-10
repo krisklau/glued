@@ -23,9 +23,20 @@ build()
     $cmd_make CC="$cmd_target_cc"
 }
 
-target_install()
+install()
 {
-    $cmd_target_strip tools/i2cdetect -o "$cfg_dir_rootfs/usr/bin/i2cdetect" &&
-    $cmd_target_strip tools/i2cget -o "$cfg_dir_rootfs/usr/bin/i2cget" &&
-    $cmd_target_strip tools/i2cset -o "$cfg_dir_rootfs/usr/bin/i2cset"
+    $cmd_mkdir \
+        "$pkg_dir_target/bin" &&
+
+    $cmd_target_strip \
+        "tools/i2cdetect" \
+        -o "$pkg_dir_target/bin/i2cdetect" &&
+
+    $cmd_target_strip \
+        "tools/i2cget" \
+        -o "$pkg_dir_target/bin/i2cget" &&
+
+    $cmd_target_strip \
+        "tools/i2cset" \
+        -o "$pkg_dir_target/bin/i2cset"
 }
