@@ -30,15 +30,15 @@ build()
     $cmd_make
 }
 
-host_install()
+install()
 {
     $cmd_make \
         DESTDIR="$pkg_dir_host" \
         install &&
 
     rm -rf \
-        "$pkg_host_dir/share/man" \
-        "$pkg_host_dir/share/info" \
-        "$pkg_host_dir/share/doc" \
-        "$pkg_host_dir/share/emacs"
+        "$pkg_dir_host/share/man" \
+        "$pkg_dir_host/share/info" \
+        "$pkg_dir_host/share/doc" \
+        "$pkg_dir_host/share/emacs"
 }
