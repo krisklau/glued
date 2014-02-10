@@ -6,10 +6,10 @@ post_unpack()
         cat $patches | patch -p1
     fi
 
-    if [ -d "$cfg_dir_root/firmware" ]; then
+    if [ -d "$cfg_dir_sysroot/firmware" ]; then
         $cmd_cp \
-            "$cfg_dir_root/firmware/"* \
-            firmware
+            "$cfg_dir_sysroot/firmware/"* \
+            "firmware"
     fi
 }
 
