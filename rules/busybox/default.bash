@@ -39,21 +39,13 @@ build()
         CROSS_COMPILE="$cfg_target_canonical"-
 }
 
-target_install()
+install()
 {
-    # Host.
-    $cmd_mkdir \
-        "$pkg_dir_sysroot" &&
-
+    # Target.
     $cmd_make \
         CROSS_COMPILE="$cfg_target_canonical"- \
-        CONFIG_PREFIX="$pkg_dir_sysroot" \
+        CONFIG_PREFIX="$pkg_dir_target" \
         install &&
-
-    # Target
-    $cmd_cp \
-        "$pkg_dir_sysroot/"* \
-        "$pkg_dir_target" &&
 
     $cmd_cp \
         "$pkg_dir/fs/"* \

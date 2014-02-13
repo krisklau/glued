@@ -6,7 +6,7 @@ configure()
         --target="$cfg_target_canonical" \
         --host="$cfg_target_canonical" \
         --build="$cfg_host_canonical" \
-        --prefix="/" \
+        --prefix="" \
         --disable-static \
         --enable-shared
 }
@@ -24,5 +24,9 @@ install()
         install &&
 
     rm -rf \
-        "$pkg_dir_sysroot/share"
+        "$pkg_dir_sysroot/share" &&
+
+    find "$pkg_dir_sysroot/lib" -type f -name '*.la' | while read f; do
+        libtool_replace_libdir "$f" "/lib" "$cfg_dir_sysroot/lib"
+    done
 }

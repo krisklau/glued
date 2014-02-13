@@ -9,8 +9,8 @@ configure()
 {
     MAKEINFO='/bin/true' \
         "../gcc-$version/configure" $cfg_target_gcc_configure_flags \
+        --prefix="" \
         --target="$cfg_target_canonical" \
-        --prefix="/" \
         --with-sysroot="$cfg_dir_sysroot" \
         --with-mpfr="$cfg_dir_root" \
         --with-gmp="$cfg_dir_root" \

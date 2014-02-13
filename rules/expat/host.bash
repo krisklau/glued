@@ -6,6 +6,7 @@ configure()
         distclean > /dev/null 2>&1
 
     "../expat-$version/configure" \
+        --prefix="$cfg_dir_root" \
         --enable-static \
         --enable-shared
 }

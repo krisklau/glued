@@ -79,32 +79,32 @@ build()
     fi
 }
 
-target_install()
+install()
 {
     $cmd_mkdir \
-        "$pkg_dir_target/boot" &&
+        "$pkg_dir_machine/boot" &&
 
     # Kernel image.
     if [ -n "$cfg_target_linux_kernel" ]; then
-        $cmd_cp "$cfg_target_linux_kernel" "$pkg_dir_target/boot/kernel"
+        $cmd_cp "$cfg_target_linux_kernel" "$pkg_dir_machine/boot/kernel"
     fi &&
 
     # Device tree blob.
     if [ -n "$cfg_target_linux_dtb" ]; then
-        $cmd_cp "$cfg_target_linux_dtb" "$pkg_dir_target/boot/board.dtb"
+        $cmd_cp "$cfg_target_linux_dtb" "$pkg_dir_machine/boot/board.dtb"
     fi &&
 
     # Modules.
     $cmd_make \
         CROSS_COMPILE="$cfg_target_canonical-" \
         ARCH="$cfg_target_linux" \
-        INSTALL_MOD_PATH="$pkg_dir_target" \
+        INSTALL_MOD_PATH="$pkg_dir_machine" \
         modules_install &&
 
     # Firmware.
     $cmd_make \
         CROSS_COMPILE="$cfg_target_canonical-" \
         ARCH="$cfg_target_linux" \
-        INSTALL_MOD_PATH="$pkg_dir_target" \
+        INSTALL_MOD_PATH="$pkg_dir_machine" \
         firmware_install
 }

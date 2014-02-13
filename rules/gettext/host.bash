@@ -21,7 +21,7 @@ maintainer=\
 configure()
 {
     "../gettext-$version/configure" \
-        --prefix="/" \
+        --prefix="" \
         --disable-nls
 }
 
@@ -33,12 +33,16 @@ build()
 install()
 {
     $cmd_make \
-        DESTDIR="$pkg_dir_host" \
+        prefix="$pkg_dir_host" \
         install &&
 
     rm -rf \
         "$pkg_dir_host/share/man" \
         "$pkg_dir_host/share/info" \
         "$pkg_dir_host/share/doc" \
-        "$pkg_dir_host/share/emacs"
+        "$pkg_dir_host/share/emacs" &&
+
+    find "$pkg_dir_host/lib" -type f -name '*.la' | while read f; do
+        libtool_replace_libdir "$f" "/lib" "$cfg_dir_root/lib"
+    done
 }

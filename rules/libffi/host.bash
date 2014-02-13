@@ -3,7 +3,7 @@ source "$pkg_common"
 configure()
 {
     "../libffi-$version/configure" \
-        --prefix='/'
+        --prefix=""
 }
 
 build()
@@ -18,5 +18,9 @@ install()
         install &&
 
     rm -rf \
-        "$pkg_dir_host/share"
+        "$pkg_dir_host/share" &&
+
+    find "$pkg_dir_host/lib" -type f -name '*.la' | while read f; do
+        libtool_replace_libdir "$f" "/lib" "$cfg_dir_root/lib"
+    done
 }

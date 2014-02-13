@@ -37,7 +37,7 @@ post_unpack()
 configure()
 {
     "../dropbear-$version/configure" \
-        --prefix="/" \
+        --prefix="" \
         --disable-utmp \
         --disable-utmpx \
         --disable-wtmp \
@@ -55,28 +55,23 @@ build()
         MULTI=1
 }
 
-host_install()
+install()
 {
-    # Host.
+    # Target.
     $cmd_make \
         PROGRAMS="dropbear dbclient dropbearkey dropbearconvert scp" \
         MULTI=1 \
-        prefix="$pkg_dir_sysroot" \
+        prefix="$pkg_dir_target" \
         install &&
 
-    ln -fs ../bin/dropbearmulti "$pkg_dir_sysroot/sbin/dropbear" &&
-    ln -fs dropbearmulti "$pkg_dir_sysroot/bin/dbclient" &&
-    ln -fs dropbearmulti "$pkg_dir_sysroot/bin/dropbearkey" &&
-    ln -fs dropbearmulti "$pkg_dir_sysroot/bin/dropbearconvert" &&
-    ln -fs dropbearmulti "$pkg_dir_sysroot/bin/scp" &&
+    ln -fs ../bin/dropbearmulti "$pkg_dir_target/sbin/dropbear" &&
+    ln -fs dropbearmulti "$pkg_dir_target/bin/dbclient" &&
+    ln -fs dropbearmulti "$pkg_dir_target/bin/dropbearkey" &&
+    ln -fs dropbearmulti "$pkg_dir_target/bin/dropbearconvert" &&
+    ln -fs dropbearmulti "$pkg_dir_target/bin/scp" &&
 
     rm -rf \
-        "$pkg_dir_sysroot/share" &&
-
-    # Target.
-    $cmd_cp \
-        "$pkg_dir_sysroot/"* \
-        "$pkg_dir_target" &&
+        "$pkg_dir_target/share" &&
 
     $cmd_target_strip \
         "$pkg_dir_target/bin/dropbearmulti" &&

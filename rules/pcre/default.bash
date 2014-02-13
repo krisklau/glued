@@ -21,5 +21,9 @@ install()
         install &&
 
     rm -rf \
-        "$pkg_dir_sysroot/share"
+        "$pkg_dir_sysroot/share" &&
+
+    find "$pkg_dir_sysroot/lib" -type f -name '*.la' | while read f; do
+        libtool_replace_libdir "$f" "$pkg_dir_sysroot/lib" "$cfg_dir_sysroot/lib"
+    done
 }

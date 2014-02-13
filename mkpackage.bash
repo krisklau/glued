@@ -59,10 +59,10 @@ pkg_config_env_host()
     export PKG_CONFIG_SYSROOT_DIR="$cfg_dir_root"
 }
 
-fix_libtool_libdir()
+libtool_replace_libdir()
 {
     sed \
-        "s%//lib%$cfg_dir_sysroot/lib%g" \
+        "s%libdir='$2'%libdir='$3'%g" \
         "$1" -i
 }
 
@@ -212,8 +212,8 @@ make_package()
             host)
                 file="$cfg_host_canonical+$pkg-$version.tar.xz"
                 ;;
-            cross)
-                file="$cfg_host_canonical+$cfg_target_canonical+$pkg-$version.tar.xz"
+            default | cross)
+                file="$cfg_host_canonical+$cfg_architecture+$pkg-$version.tar.xz"
                 ;;
             *)
                 file="$cfg_host_canonical+$pkg-$version-$pkg_var.tar.xz"
@@ -229,10 +229,10 @@ make_package()
     if [ -n "$(ls -A "$pkg_dir_target")" ]; then
         case "$pkg_var" in
             default | target | cross)
-                file="$cfg_target_canonical+$pkg-$version.tar.xz"
+                file="$cfg_architecture+$pkg-$version.tar.xz"
                 ;;
             *)
-                file="$cfg_target_canonical+$pkg-$version-$pkg_var.tar.xz"
+                file="$cfg_architecture+$pkg-$version-$pkg_var.tar.xz"
                 ;;
         esac
 

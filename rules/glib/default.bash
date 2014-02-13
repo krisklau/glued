@@ -1,39 +1,24 @@
-version=\
-(
-    '2.37.1'
-)
-
-url=\
-(
-    "http://ftp.acc.umu.se/pub/gnome/sources/glib/2.37/glib-$version.tar.xz"
-)
-
-md5=\
-(
-    'bee51d61aa0d9b4071e997ff6c5fed5e'
-)
-
-maintainer=\
-(
-    'Ricardo Martins <rasm@fe.up.pt>'
-)
+source "$pkg_common"
 
 requires=\
 (
     'pcre/default'
     'libffi/default'
+    'python2/host'
 )
 
 configure()
 {
-    export PKG_CONFIG_PATH="$cfg_dir_toolchain_sysroot/usr/lib/pkgconfig"
+    $cmd_make \
+        distclean > /dev/null 2>&1
+
     export glib_cv_stack_grows=no
     export glib_cv_uscore=yes
     export ac_cv_func_posix_getpwuid_r=yes
     export ac_cv_func_posix_getgrgid_r=yes
 
     ./configure \
-        --prefix="$cfg_dir_toolchain_sysroot/usr" \
+        --prefix="$pkg_dir_sysroot" \
         --target="$cfg_target_canonical" \
         --host="$cfg_target_canonical" \
         --build="$cfg_host_canonical" \
@@ -49,7 +34,16 @@ build()
     $cmd_make
 }
 
-host_install()
+install()
 {
-    $cmd_make install
+    # Host.
+    $cmd_make \
+        install &&
+
+    rm -rf \
+        "$pkg_dir_sysroot/share" &&
+
+    find "$pkg_dir_sysroot/lib" -type f -name '*.la' | while read f; do
+        libtool_replace_libdir "$f" "$pkg_dir_sysroot/lib" "$cfg_dir_sysroot/lib"
+    done
 }

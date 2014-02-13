@@ -23,7 +23,7 @@ unpack()
     git checkout "$version"
 }
 
-host_install()
+install()
 {
     $cmd_mkdir \
         "$pkg_dir_sysroot/firmware" &&
