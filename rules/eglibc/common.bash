@@ -1,6 +1,6 @@
 version=\
 (
-    '2.15.17955'
+    '2.19.25444'
 )
 
 url=\
@@ -10,7 +10,7 @@ url=\
 
 md5=\
 (
-    '0694f304863e3c97562857388137a83e'
+    'f6decd9a1a62b680344275302dfdd95a'
 )
 
 maintainer=\
@@ -50,8 +50,11 @@ configure()
         --disable-profile \
         --without-gd \
         --without-cvs \
-        --enable-add-ons \
         --with-tls \
-        --enable-kernel=2.6.32 \
+        --with-__thread \
+        --enable-kernel=3.10 \
+        --enable-add-ons \
+        --enable-obsolete-rpc \
+        --enable-static-nss
         --disable-nls
 }
