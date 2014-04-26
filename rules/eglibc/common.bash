@@ -5,7 +5,7 @@ version=\
 
 url=\
 (
-    "http://www.lsts.pt/glued/eglibc-$version.tar.bz2"
+    "http://www.lsts.pt/glued/eglibc-$version.tar.xz"
 )
 
 md5=\
@@ -55,6 +55,6 @@ configure()
         --enable-kernel=3.10 \
         --enable-add-ons \
         --enable-obsolete-rpc \
-        --enable-static-nss
+        --enable-static-nss \
         --disable-nls
 }
