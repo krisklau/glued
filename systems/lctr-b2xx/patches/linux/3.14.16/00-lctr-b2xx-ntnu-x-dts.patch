@@ -1,4 +1,4 @@
-diff -ruN linux-3.14.16/arch/arm/boot/dts/am335x-lctr-b2xx-ntnu-gpio.dts linux-3.14.16.kk/arch/arm/boot/dts/am335x-lctr-b2xx-ntnu-gpio.dts
+diff -Nru linux-3.14.16/arch/arm/boot/dts/am335x-lctr-b2xx-ntnu-gpio.dts linux-3.14.16.kk/arch/arm/boot/dts/am335x-lctr-b2xx-ntnu-gpio.dts
 --- linux-3.14.16/arch/arm/boot/dts/am335x-lctr-b2xx-ntnu-gpio.dts	1970-01-01 01:00:00.000000000 +0100
 +++ linux-3.14.16.kk/arch/arm/boot/dts/am335x-lctr-b2xx-ntnu-gpio.dts	2014-10-23 13:22:18.216000000 +0200
 @@ -0,0 +1,56 @@
@@ -58,10 +58,10 @@ diff -ruN linux-3.14.16/arch/arm/boot/dts/am335x-lctr-b2xx-ntnu-gpio.dts linux-3
 +	pinctrl-0 = <&uart4_pins>;
 +	status = "okay";
 +};
-diff -ruN linux-3.14.16/arch/arm/boot/dts/am335x-lctr-b2xx-ntnu-uart.dts linux-3.14.16.kk/arch/arm/boot/dts/am335x-lctr-b2xx-ntnu-uart.dts
+diff -Nru linux-3.14.16/arch/arm/boot/dts/am335x-lctr-b2xx-ntnu-uart.dts linux-3.14.16.kk/arch/arm/boot/dts/am335x-lctr-b2xx-ntnu-uart.dts
 --- linux-3.14.16/arch/arm/boot/dts/am335x-lctr-b2xx-ntnu-uart.dts	1970-01-01 01:00:00.000000000 +0100
-+++ linux-3.14.16.kk/arch/arm/boot/dts/am335x-lctr-b2xx-ntnu-uart.dts	2014-10-20 21:35:33.608000000 +0200
-@@ -0,0 +1,52 @@
++++ linux-3.14.16.kk/arch/arm/boot/dts/am335x-lctr-b2xx-ntnu-uart.dts	2015-02-27 12:31:03.672000000 +0100
+@@ -0,0 +1,83 @@
 +/*
 + * Copyright (C) 2014 Universidade do Porto - Faculdade de Engenharia
 + *
@@ -99,7 +99,18 @@ diff -ruN linux-3.14.16/arch/arm/boot/dts/am335x-lctr-b2xx-ntnu-uart.dts linux-3
 +			0x74 (PIN_OUTPUT_PULLDOWN | MUX_MODE6)
 +		>;
 +	};
-+};
++    
++    /* SPI1 */
++    spi1_pins_s0: spi1_pins_s0 {
++        pinctrl-single,pins = <
++                0x190 0x33      /* mcasp0_aclkx.spi1_sclk, INPUT_PULLUP | MODE3 */
++                0x194 0x33      /* mcasp0_fsx.spi1_d0, INPUT_PULLUP | MODE3 */
++                0x198 0x13      /* mcasp0_axr0.spi1_d1, OUTPUT_PULLUP | MODE3 */
++                0x19c 0x13      /* mcasp0_ahclkr.spi1_cs0, OUTPUT_PULLUP | MODE3 */
++                0x164 0x12      /* eCAP0_in_PWM0_out.spi1_cs1 , OUTPUT_PULLUP | MODE2 */
++            >;
++        };
++    };
 +
 +/* Enable UART2. */
 +&uart2 {
@@ -114,7 +125,27 @@ diff -ruN linux-3.14.16/arch/arm/boot/dts/am335x-lctr-b2xx-ntnu-uart.dts linux-3
 +	pinctrl-0 = <&uart4_pins>;
 +	status = "okay";
 +};
-diff -ruN linux-3.14.16/arch/arm/boot/dts/Makefile linux-3.14.16.kk/arch/arm/boot/dts/Makefile
++
++/* Enable SPI1 */
++&spi1 {
++    #address-cells = <1>;
++    #size-cells = <0>;
++    status = "okay";
++    pinctrl-names = "default";
++    pinctrl-0 = <&spi1_pins_s0>;
++
++    spidev@1 {
++        spi-max-frequency = <24000000>;
++        reg = <0>;
++        compatible = "linux,spidev";
++    };
++    spidev@2 {
++        spi-max-frequency = <24000000>;
++        reg = <1>;
++        compatible = "linux,spidev";
++    };
++};
+diff -Nru linux-3.14.16/arch/arm/boot/dts/Makefile linux-3.14.16.kk/arch/arm/boot/dts/Makefile
 --- linux-3.14.16/arch/arm/boot/dts/Makefile	2014-08-08 01:50:59.000000000 +0200
 +++ linux-3.14.16.kk/arch/arm/boot/dts/Makefile	2014-10-23 13:24:50.292000000 +0200
 @@ -227,6 +227,8 @@
