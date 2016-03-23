@@ -3,6 +3,11 @@ version=\
     '3.14.63'
 )
 
+mmversion=\
+(
+    '3.14.xx'
+)
+
 url=\
 (
     "https://www.kernel.org/pub/linux/kernel/v3.x/linux-$version.tar.xz"
@@ -27,8 +32,8 @@ requires=\
 
 post_unpack()
 {
-    patches=$(ls "$pkg_dir/patches/$version/"*.patch\
-	"$cfg_dir_system/patches/linux/$version/"*.patch 2>/dev/null)
+    patches=$(ls "$pkg_dir/patches/$mmversion/"*.patch\
+	"$cfg_dir_system/patches/linux/$mmversion/"*.patch 2>/dev/null)
     if [ -n "$patches" ]; then
         cat $patches | patch -p1
     fi
@@ -41,7 +46,7 @@ post_unpack()
 refresh()
 {
     for rule in configure build target_install; do
-        if [ "$cfg_dir_system/cfg/linux-${version}.cfg" -nt "$cfg_dir_builds/linux/$pkg_var/.$rule" ]; then
+        if [ "$cfg_dir_system/cfg/linux-${mmversion}.cfg" -nt "$cfg_dir_builds/linux/$pkg_var/.$rule" ]; then
             rm "$cfg_dir_builds/linux/$pkg_var/.$rule"
         fi
     done
@@ -53,7 +58,7 @@ configure()
         ARCH=${cfg_target_linux} \
         mrproper &&
 
-    cp "$cfg_dir_system/cfg/linux-${version}.cfg" .config &&
+    cp "$cfg_dir_system/cfg/linux-${mmversion}.cfg" .config &&
 
     if [ -f "$cfg_dir_system/files/initramfs_init.sh" ]; then
         $cmd_mkdir initramfs &&
